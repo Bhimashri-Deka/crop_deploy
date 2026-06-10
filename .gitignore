@@ -1,0 +1,49 @@
+# Python Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# SQLite databases (local runtime databases)
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Environments & Virtual Envs
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*~
+
+# Ignore all CSV and PKL files by default
+*.csv
+*.pkl
+
+# Do NOT ignore specific files required by the app to execute and build on Render
+!FINAL_CLEAN_AGRI_DATASET.csv
+!xgboost_production_model.pkl
+!xgboost_modal_price_model.pkl
+!ordinal_encoder_production_features.pkl
+!ordinal_encoder_price_features.pkl
+
+# Exclude raw directories
+mandi_data_2001to2014/
+
+# Operating System Files
+desktop.ini
+.DS_Store
+Thumbs.db

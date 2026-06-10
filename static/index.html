@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroPredict - Crop Yield & Price Engine</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons (development bundle) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <!-- Dynamic Ambient Background Slideshow -->
+    <div class="bg-slideshow">
+        <div class="slide active" style="background-image: url('/images/farmer_green_field.png');"></div>
+        <div class="slide" style="background-image: url('/images/lush_green_crops.png');"></div>
+        <div class="bg-overlay"></div>
+    </div>
+    
+    <!-- Canvas Overlay for floating leaves -->
+    <canvas id="canvas-particles"></canvas>
+
+    <div class="app-container">
+        <!-- HEADER / NAV -->
+        <header id="main-header" class="glass-nav hidden">
+            <div class="logo">
+                <span class="logo-emoji">🌾</span>
+                <div class="logo-text">
+                    <h1>AgroPredict</h1>
+                    <span>Yield & Market Price Platform</span>
+                </div>
+            </div>
+            <div class="nav-controls">
+                <div class="user-badge">
+                    <i data-lucide="user"></i>
+                    <span id="nav-username">Farmer</span>
+                </div>
+                
+                <!-- Dual-Mode Toggle Switch -->
+                <div class="mode-toggle-container">
+                    <span class="mode-label active" id="lbl-mode-farmer">Farmer Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="mode-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="mode-label" id="lbl-mode-tech">Technical Mode</span>
+                </div>
+
+                <button id="btn-toggle-monitor" class="btn-secondary">
+                    <i data-lucide="activity"></i>
+                    <span>System Monitoring</span>
+                </button>
+                <button id="btn-logout" class="btn-danger">
+                    <i data-lucide="log-out"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT VIEWS -->
+        <main class="view-viewport">
+            
+            <!-- VIEW 1: AUTHENTICATION -->
+            <section id="view-auth" class="view-section active">
+                <div class="auth-card glass-panel">
+                    <div class="auth-header">
+                        <span class="auth-icon">🌱</span>
+                        <h2 id="auth-title">Welcome to AgroPredict</h2>
+                        <p id="auth-subtitle">Secure access to agriculture yield & price models</p>
+                    </div>
+                    
+                    <form id="form-auth" class="auth-form">
+                        <div class="form-group">
+                            <label for="auth-username">Username</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="user"></i>
+                                <input type="text" id="auth-username" required placeholder="Enter username">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="auth-password">Password</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="lock"></i>
+                                <input type="password" id="auth-password" required placeholder="Enter password">
+                            </div>
+                        </div>
+                        <div id="auth-error-msg" class="error-banner hidden">
+                            <i data-lucide="alert-circle"></i>
+                            <span class="msg-text">Invalid login credentials</span>
+                        </div>
+                        <button type="submit" id="btn-auth-submit" class="btn-primary btn-block">
+                            <span class="btn-text">Sign In</span>
+                            <div class="spinner hidden"></div>
+                        </button>
+                    </form>
+                    
+                    <div class="auth-footer">
+                        <p id="auth-switch-prompt">Don't have an account? <a href="#" id="link-switch-auth">Register here</a></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 2: DASHBOARD -->
+            <section id="view-dashboard" class="view-section hidden">
+                <div class="dashboard-grid">
+                    
+                    <!-- INPUT PANEL -->
+                    <div class="glass-panel input-panel">
+                        <div class="panel-header">
+                            <i data-lucide="sliders" class="header-icon"></i>
+                            <div>
+                                <h2>Predictive Input Engine</h2>
+                                <p>Provide details to estimate yield and crop market values</p>
+                            </div>
+                        </div>
+                        
+                        <form id="form-predict" class="prediction-form">
+                            <!-- State & District Row -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="predict-state">State<span class="tooltip-trigger" data-tooltip="Select the geographic state for the prediction engine."><i data-lucide="help-circle"></i></span></label>
+                                    <select id="predict-state" required>
+                                        <option value="" disabled selected>Select State</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="predict-district">District<span class="tooltip-trigger" data-tooltip="Select the district. Options are filtered dynamically based on the state."><i data-lucide="help-circle"></i></span></label>
+                                    <select id="predict-district" required disabled>
+                                        <option value="" disabled selected>Select District</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Crop & Season Row -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="predict-crop">Crop Type<span class="tooltip-trigger" data-tooltip="Select the crop. Options show crops historically grown in this district."><i data-lucide="help-circle"></i></span></label>
+                                    <select id="predict-crop" required disabled>
+                                        <option value="" disabled selected>Select Crop</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="predict-season">Season<span class="tooltip-trigger" data-tooltip="Select the agricultural season for the cultivation cycle."><i data-lucide="help-circle"></i></span></label>
+                                    <select id="predict-season" required>
+                                        <option value="" disabled selected>Select Season</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- PROGRESSIVE CULTIVATION PARAMETERS SECTION (Revealed on Step 1 complete) -->
+                            <div id="section-land-conditions" class="progressive-section hidden">
+                                <!-- Area & Rainfall Row -->
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="predict-area">Land Area (Hectares)<span class="tooltip-trigger" data-tooltip="Total farm area planned for this crop (1 Hectare = 2.47 Acres)."><i data-lucide="help-circle"></i></span></label>
+                                        <div class="input-wrapper">
+                                            <i data-lucide="layers"></i>
+                                            <input type="number" id="predict-area" required min="0.1" step="0.1" value="10.0">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="predict-rainfall"><span id="lbl-rainfall-input">Expected Rainfall (mm)</span><span class="tooltip-trigger" id="rainfall-input-tooltip" data-tooltip="Expected rainfall in millimeters. Auto-populated from historical regional averages."><i data-lucide="help-circle"></i></span></label>
+                                        <div class="input-wrapper">
+                                            <i data-lucide="cloud-rain"></i>
+                                            <input type="number" id="predict-rainfall" required step="0.1" value="800.0">
+                                        </div>
+                                        <span class="input-tip" id="rainfall-tip">Historical average: Loading...</span>
+                                    </div>
+                                </div>
+
+                                <!-- COLLAPSIBLE ADVANCED SETTINGS -->
+                                <details class="advanced-settings glass-inner">
+                                    <summary class="advanced-summary">
+                                        <span>Advanced Price Engine Settings</span>
+                                        <i data-lucide="chevron-down" class="chevron-icon"></i>
+                                    </summary>
+                                    <div class="advanced-content">
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="predict-market">Market</label>
+                                                <input type="text" id="predict-market" list="markets-list" placeholder="Auto-resolved default">
+                                                <datalist id="markets-list"></datalist>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="predict-variety">Crop Variety</label>
+                                                <input type="text" id="predict-variety" list="varieties-list" placeholder="Auto-resolved default">
+                                                <datalist id="varieties-list"></datalist>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="predict-grade">Quality Grade</label>
+                                                <select id="predict-grade">
+                                                    <!-- Populated dynamically -->
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="predict-month">Month (1-12)</label>
+                                                <input type="number" id="predict-month" min="1" max="12" value="6">
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="predict-min-price" id="lbl-min-price-title">Min Price (₹ / Quintal)</label>
+                                                <input type="number" id="predict-min-price" step="0.01" placeholder="Auto-resolved default">
+                                                <span class="input-tip" id="min-price-tip">Historical default: Loading...</span>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="predict-max-price" id="lbl-max-price-title">Max Price (₹ / Quintal)</label>
+                                                <input type="number" id="predict-max-price" step="0.01" placeholder="Auto-resolved default">
+                                                <span class="input-tip" id="max-price-tip">Historical default: Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </details>
+                            </div>
+
+                            <button type="submit" id="btn-predict-submit" class="btn-primary btn-block" disabled>
+                                <i data-lucide="bar-chart-2"></i>
+                                <span class="btn-text">Run Predictive Engine</span>
+                                <div class="spinner hidden"></div>
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- RESULTS PANEL -->
+                    <div class="glass-panel results-panel">
+                        <div class="panel-header">
+                            <i data-lucide="trending-up" class="header-icon"></i>
+                            <div>
+                                <h2>Prediction Analysis</h2>
+                                <p>Interactive valuation based on machine learning regressors</p>
+                            </div>
+                        </div>
+
+                        <div id="results-placeholder" class="results-placeholder-state">
+                            <div class="placeholder-animation">🌾</div>
+                            <h3>Awaiting Dashboard Parameters</h3>
+                            <p>Select your crop, region, and land attributes and hit "Run Predictive Engine" to render ML forecasts.</p>
+                        </div>
+
+                        <div id="results-content" class="results-real-content hidden">
+                            <!-- Weather Impact & Yield Card -->
+                            <div class="metric-card yield-card weather-impact-card">
+                                <div class="revenue-header-row">
+                                    <span class="metric-label">Weather Impact & Expected Yield</span>
+                                    <div class="confidence-badge" id="weather-status-badge" style="background: rgba(16, 185, 129, 0.12); color: #a7f3d0; border-color: rgba(16, 185, 129, 0.3);">
+                                        <i data-lucide="cloud-rain"></i>
+                                        <span id="lbl-weather-status">Normal Rainfall</span>
+                                    </div>
+                                </div>
+                                <div class="metric-value-container">
+                                    <span class="metric-number" id="res-yield">0.00</span>
+                                    <span class="metric-unit">Tonnes</span>
+                                </div>
+                                <p class="weather-insight-narrative" id="res-weather-narrative" style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--text-muted); line-height: 1.5;"></p>
+                                <div class="card-bar-bg"><div class="card-bar-fill" style="width: 75%;"></div></div>
+                                <!-- Yield Trend Sparkline Chart -->
+                                <div class="sparkline-wrapper">
+                                    <span class="sparkline-title">5-Year Yield Trend (Tonnes per Hectare)</span>
+                                    <div class="sparkline-container" id="yield-trend-sparkline"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Market Outlook Card -->
+                            <div class="metric-card price-card market-outlook-card">
+                                <div class="revenue-header-row">
+                                    <span class="metric-label">Market Price Outlook</span>
+                                    <div class="confidence-badge" id="market-trend-badge" style="background: rgba(2, 132, 199, 0.12); color: #bae6fd; border-color: rgba(2, 132, 199, 0.3);">
+                                        <i data-lucide="trending-up" id="market-trend-icon"></i>
+                                        <span id="lbl-market-trend">Stable Trend</span>
+                                    </div>
+                                </div>
+                                <div class="price-range-display-container">
+                                    <div class="metric-value-container">
+                                        <span class="metric-currency">₹</span>
+                                        <span class="metric-number" id="res-price">0.00</span>
+                                        <span class="metric-unit">per Quintal</span>
+                                    </div>
+                                    <div class="price-range-subtitle" style="font-size: 0.85rem; margin-top: 0.4rem; color: var(--text-muted); display: flex; gap: 0.35rem; align-items: baseline;">
+                                        <span>Expected Price Range:</span>
+                                        <strong id="res-price-range" style="color: var(--text-main); font-weight: 700; font-family: var(--font-heading);">₹0.00 – ₹0.00</strong>
+                                    </div>
+                                </div>
+                                <div class="card-bar-bg"><div class="card-bar-fill" style="width: 60%;"></div></div>
+                                <!-- Price Trend Sparkline Chart -->
+                                <div class="sparkline-wrapper">
+                                    <span class="sparkline-title">5-Year Market Price Trend (₹ / Quintal)</span>
+                                    <div class="sparkline-container" id="price-trend-sparkline"></div>
+                                </div>
+                            </div>
+
+                            <!-- Expected Yearly Revenue & Confidence -->
+                            <div class="metric-card revenue-card">
+                                <div class="revenue-header-row">
+                                    <span class="metric-label">Expected Yearly Revenue</span>
+                                    <div class="confidence-badge">
+                                        <i data-lucide="shield-check"></i>
+                                        <span>94% Confidence Interval (±12% Variation)</span>
+                                    </div>
+                                </div>
+                                <div class="metric-value-container">
+                                    <span class="metric-currency">₹</span>
+                                    <span class="metric-number" id="res-revenue">0.00</span>
+                                </div>
+                                <div class="revenue-range-row">
+                                    <span class="range-boundary" id="res-rev-min">Min Bounds: ₹0.00</span>
+                                    <span class="range-divider"></span>
+                                    <span class="range-boundary" id="res-rev-max">Max Bounds: ₹0.00</span>
+                                </div>
+                                <p class="revenue-note">Calculated as: Predicted Yield (Tonnes) × Market Price (per Quintal × 10)</p>
+                            </div>
+
+                            <!-- Mini Data Visualization: Market Price Positioning Gauge (Technical Mode Only) -->
+                            <div class="metric-card visualization-card tech-mode-only">
+                                <span class="metric-label">Market Price Positioning Gauge</span>
+                                <div class="gauge-container">
+                                    <div class="gauge-track">
+                                        <div class="gauge-bar-fill" id="gauge-bar-fill" style="left: 0%; width: 50%;"></div>
+                                        <div class="gauge-marker" id="res-gauge-marker" style="left: 50%;"></div>
+                                    </div>
+                                    <div class="gauge-labels">
+                                        <span id="gauge-lbl-min">Historical Min: -</span>
+                                        <span class="gauge-middle" id="gauge-lbl-current">Predicted Modal</span>
+                                        <span id="gauge-lbl-max">Historical Max: -</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Explainability Card -->
+                            <details class="explainability-card glass-inner" id="explainability-details" open>
+                                <summary class="explainability-summary">
+                                    <div class="summary-title">
+                                        <i data-lucide="info" class="explain-icon"></i>
+                                        <span id="explain-card-title">Why This Prediction? (ML Insights)</span>
+                                    </div>
+                                    <i data-lucide="chevron-down" class="chevron-icon"></i>
+                                </summary>
+                                <div class="explainability-content">
+                                    <p id="explain-text" class="explain-para">Analyzing crop features...</p>
+                                    
+                                    <!-- Visually Intuitive Farmer-Friendly Feature Importance Bars -->
+                                    <div class="importance-bars-friendly" id="importance-bars-friendly">
+                                        <div class="importance-item">
+                                            <div class="importance-label-row">
+                                                <span class="explain-label-with-icon"><i data-lucide="maximize"></i> Farm Size Influence</span>
+                                                <span class="imp-friendly-label" id="imp-area-friendly-lbl" style="font-weight: 700; color: #10b981;">High Influence</span>
+                                             </div>
+                                             <div class="importance-bar-bg"><div class="importance-bar-fill" id="imp-area-friendly-bar" style="width: 60%; background: linear-gradient(90deg, #10b981, #34d399);"></div></div>
+                                        </div>
+                                        <div class="importance-item">
+                                            <div class="importance-label-row">
+                                                <span class="explain-label-with-icon"><i data-lucide="cloud-rain"></i> Rainfall & Weather Impact</span>
+                                                <span class="imp-friendly-label" id="imp-rain-friendly-lbl" style="font-weight: 700; color: #0284c7;">Medium Influence</span>
+                                             </div>
+                                             <div class="importance-bar-bg"><div class="importance-bar-fill" id="imp-rain-friendly-bar" style="width: 25%; background: linear-gradient(90deg, #0284c7, #60a5fa);"></div></div>
+                                        </div>
+                                        <div class="importance-item">
+                                            <div class="importance-label-row">
+                                                <span class="explain-label-with-icon"><i data-lucide="map-pin"></i> Soil & Location Suitability</span>
+                                                <span class="imp-friendly-label" id="imp-base-friendly-lbl" style="font-weight: 700; color: #f59e0b;">Baseline Influence</span>
+                                             </div>
+                                             <div class="importance-bar-bg"><div class="importance-bar-fill" id="imp-base-friendly-bar" style="width: 15%; background: linear-gradient(90deg, #f59e0b, #fbbf24);"></div></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Technical Model Feature Weights (Technical Mode Only) -->
+                                    <div class="importance-bars tech-mode-only">
+                                        <div class="importance-item">
+                                            <div class="importance-label-row">
+                                                <span class="explain-label-with-icon"><i data-lucide="maximize"></i> Raw Area Weight</span>
+                                                <span class="imp-pct" id="imp-area-val">60%</span>
+                                            </div>
+                                            <div class="importance-bar-bg"><div class="importance-bar-fill" id="imp-area-bar" style="width: 60%; background: linear-gradient(90deg, #10b981, #34d399);"></div></div>
+                                        </div>
+                                        <div class="importance-item">
+                                            <div class="importance-label-row">
+                                                <span class="explain-label-with-icon"><i data-lucide="cloud-rain"></i> Raw Rainfall Z-Score Weight</span>
+                                                <span class="imp-pct" id="imp-rain-val">25%</span>
+                                            </div>
+                                            <div class="importance-bar-bg"><div class="importance-bar-fill" id="imp-rain-bar" style="width: 25%; background: linear-gradient(90deg, #0284c7, #60a5fa);"></div></div>
+                                        </div>
+                                        <div class="importance-item">
+                                            <div class="importance-label-row">
+                                                <span class="explain-label-with-icon"><i data-lucide="map-pin"></i> Raw Location Suitability Weight</span>
+                                                <span class="imp-pct" id="imp-base-val">15%</span>
+                                            </div>
+                                            <div class="importance-bar-bg"><div class="importance-bar-fill" id="imp-base-bar" style="width: 15%; background: linear-gradient(90deg, #f59e0b, #fbbf24);"></div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+
+                            <!-- Metadata details of predictions (Technical Mode Only) -->
+                            <div class="prediction-meta glass-inner tech-mode-only">
+                                <h3>Engine Parameters Used</h3>
+                                <div class="meta-grid">
+                                    <div class="meta-item"><span class="meta-label">Market Center:</span> <span id="meta-market" class="meta-val">-</span></div>
+                                    <div class="meta-item"><span class="meta-label">Crop Variety:</span> <span id="meta-variety" class="meta-val">-</span></div>
+                                    <div class="meta-item"><span class="meta-label">Product Grade:</span> <span id="meta-grade" class="meta-val">-</span></div>
+                                    <div class="meta-item"><span class="meta-label">Model Min Price:</span> <span id="meta-min-price" class="meta-val">-</span></div>
+                                    <div class="meta-item"><span class="meta-label">Model Max Price:</span> <span id="meta-max-price" class="meta-val">-</span></div>
+                                    <div class="meta-item"><span class="meta-label">Model Rainfall Index:</span> <span id="meta-rain-index" class="meta-val">-</span></div>
+                                    <div class="meta-item"><span class="meta-label">Execution Delay:</span> <span id="meta-latency" class="meta-val">-</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Valuation Report Customizer -->
+                            <div class="report-customizer glass-inner">
+                                <div class="customizer-header">
+                                    <i data-lucide="settings"></i>
+                                    <h3>Configure Valuation Report Export</h3>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="report-farmer-name">Farmer / Organization Name</label>
+                                        <div class="input-wrapper">
+                                            <i data-lucide="user"></i>
+                                            <input type="text" id="report-farmer-name" placeholder="Enter owner name">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="report-plot-id">Field / Plot Identifier</label>
+                                        <div class="input-wrapper">
+                                            <i data-lucide="tag"></i>
+                                            <input type="text" id="report-plot-id" placeholder="Enter field identifier">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="report-theme">Report Document Theme</label>
+                                        <select id="report-theme">
+                                            <option value="classic" selected>Classic Clean Professional</option>
+                                            <option value="dark">AgroPredict Dark Mode</option>
+                                            <option value="green">Eco Agriculture Green</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Included Sections</label>
+                                        <div class="checkbox-horizontal-group">
+                                            <label class="custom-checkbox">
+                                                <input type="checkbox" id="chk-include-charts" checked>
+                                                <span>Trend Charts</span>
+                                            </label>
+                                            <label class="custom-checkbox">
+                                                <input type="checkbox" id="chk-include-insights" checked>
+                                                <span>ML Insights</span>
+                                            </label>
+                                            <label class="custom-checkbox">
+                                                <input type="checkbox" id="chk-include-params" checked>
+                                                <span>Parameters</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PDF Download Button -->
+                            <button id="btn-download-report" class="btn-primary" style="margin-top: 0.5rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                <i data-lucide="download"></i>
+                                <span>Download Harvest Valuation Report</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 3: SYSTEM MONITORING (COLLAPSIBLE / TOGGLE PANEL) -->
+            <section id="view-monitoring" class="view-section hidden">
+                <div class="monitoring-container glass-panel">
+                    <div class="monitoring-header">
+                        <div class="title-with-badge">
+                            <h2>System Health & Maintenance Monitor</h2>
+                            <span class="badge badge-success"><span class="ping-circle"></span>Active Status</span>
+                        </div>
+                        <button id="btn-close-monitor" class="btn-secondary">
+                            <i data-lucide="chevron-left"></i>
+                            <span>Back to Dashboard</span>
+                        </button>
+                    </div>
+
+                    <!-- METRICS GRID -->
+                    <div class="metrics-summary-grid">
+                        <div class="summary-card glass-inner">
+                            <div class="card-icon-container"><i data-lucide="cpu"></i></div>
+                            <div class="summary-details">
+                                <span class="summary-label">Model System Status</span>
+                                <span class="summary-value" id="mon-model-status">HEALTHY</span>
+                            </div>
+                        </div>
+                        <div class="summary-card glass-inner">
+                            <div class="card-icon-container"><i data-lucide="database"></i></div>
+                            <div class="summary-details">
+                                <span class="summary-label">Database Connection</span>
+                                <span class="summary-value" id="mon-db-status">HEALTHY</span>
+                            </div>
+                        </div>
+                        <div class="summary-card glass-inner">
+                            <div class="card-icon-container"><i data-lucide="zap"></i></div>
+                            <div class="summary-details">
+                                <span class="summary-label">Avg Prediction Latency</span>
+                                <span class="summary-value" id="mon-latency">0.00 ms</span>
+                            </div>
+                        </div>
+                        <div class="summary-card glass-inner">
+                            <div class="card-icon-container"><i data-lucide="server"></i></div>
+                            <div class="summary-details">
+                                <span class="summary-label">Total Predictions Logged</span>
+                                <span class="summary-value" id="mon-total-preds">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LOG TABLES SUB-GRID -->
+                    <div class="logs-grid">
+                        <!-- Left: Prediction Logs -->
+                        <div class="logs-card glass-inner">
+                            <h3><i data-lucide="table"></i> Recent Prediction Log Audit</h3>
+                            <div class="table-container">
+                                <table id="table-predictions">
+                                    <thead>
+                                        <tr>
+                                            <th>Timestamp</th>
+                                            <th>User</th>
+                                            <th>Crop</th>
+                                            <th>State/District</th>
+                                            <th>Yield (T)</th>
+                                            <th>Price (₹/Q)</th>
+                                            <th>Total (₹)</th>
+                                            <th>Latency</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Right: Auth Audit logs -->
+                        <div class="logs-card glass-inner">
+                            <h3><i data-lucide="shield-alert"></i> Security & Authentication Audit Logs</h3>
+                            <div class="table-container">
+                                <table id="table-auth">
+                                    <thead>
+                                        <tr>
+                                            <th>Timestamp</th>
+                                            <th>Username</th>
+                                            <th>Action Event</th>
+                                            <th>IP Address</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+        
+        <!-- FOOTER -->
+        <footer class="main-footer">
+            <p>&copy; 2026 AgroPredict. Dynamic Machine Learning Crop Engine. All rights reserved.</p>
+        </footer>
+    </div>
+    
+    <!-- Hidden Print Report Container -->
+    <div id="print-report-area"></div>
+
+    <!-- Application Script -->
+    <script src="/js/app.js"></script>
+</body>
+</html>

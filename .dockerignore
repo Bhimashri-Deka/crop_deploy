@@ -1,0 +1,27 @@
+# Exclude git repository
+.git
+.gitignore
+
+# Exclude python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Exclude local database and SQLite logs
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Exclude IDE folders
+.vscode/
+.idea/
+
+# Exclude raw development datasets, scratch files, and temporary outputs
+Sub_Division_IMD_2017.csv
+crop_production.csv
+mandi_data_2001to2014/
+scratch/
+artifacts/
+.gemini/
