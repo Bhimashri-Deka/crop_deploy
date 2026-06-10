@@ -64,15 +64,19 @@ This repository contains a `render.yaml` Blueprint definition file. Render can r
 5. Render will automatically read the `render.yaml` file, provision a standard Web Service, configure a 1GB persistent disk at `/data`, and deploy the service.
 
 ### Option 2: Manual Render Deployment
+
 If you prefer to configure the service manually on Render:
 
 1. Create a new **Web Service** on Render and connect your repository.
 2. Select **Docker** as the Runtime environment.
-3. In the **Advanced** section, add the following Environment Variables:
-   - `SECRET_KEY`: A random secure string for JWT and cookie signing.
-   - `DB_PATH`: `/data/crop_app.db`
-4. Under the **Disks** section, add a persistent disk:
+3. Choose your instance type:
+   - **Free Plan (No Card Required):** Database will run inside the container. It is completely free, but any database logs/new user registrations will reset whenever Render restarts your server (at least once daily).
+   - **Paid Plans (Requires Card):** For production persistence, use a paid tier.
+4. (Optional) In the **Advanced** section, add the following Environment Variables:
+   - `SECRET_KEY`: A secure key for session token signing (e.g., `my_secure_random_key_here`).
+   - `DB_PATH`: Set to `/data/crop_app.db` **only** if you are using a persistent disk. If you are on the Free Plan, do not set this variable.
+5. **For Paid Plans only (Disk Mount):** Under the **Disks** section, click **Add Disk**:
    - **Name:** `agropredict-data`
    - **Mount Path:** `/data`
-   - **Size:** `1 GiB` (or standard size)
-5. Save and deploy. Render will automatically build the `Dockerfile`, mount the persistent disk, and start the app on port `8080`.
+   - **Size:** `1 GiB`
+6. Click **Create Web Service**. Render will automatically build the `Dockerfile` and start the application on port `8080`.
