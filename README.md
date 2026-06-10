@@ -6,13 +6,63 @@ AgroPredict is a production-ready web application built with FastAPI and SQLite.
 
 ---
 
-## Features
+## 🛠 Tech Stack
 
-- **Yield Prediction:** Powered by XGBoost regression, with fallback calculations to historical averages when pre-trained category mappings (like the newly added state of Assam) are unavailable.
-- **Price Forecasting:** Machine learning-based modal price predictions.
-- **Interactive SPA Frontend:** A premium, responsive dashboard displaying analytics, projections, and logs.
-- **Audit & Analytics Logging:** Tracks user predictions and authentication history in a persistent SQLite database.
-- **Production-Ready Deployment:** Formatted for easy Container/Docker execution and automated Render deployments.
+- **Backend:** FastAPI (Python), Uvicorn (ASGI server)
+- **Frontend:** HTML5, Vanilla CSS3, Javascript (Modern ES6 SPA, dynamic inputs, charting)
+- **Database:** SQLite (with dynamic environment path config for container volume persistence)
+- **Machine Learning:** XGBoost Regression, Scikit-Learn (Ordinal Encoding), Pandas, NumPy
+- **Deployment & DevOps:** Docker, Render (Blueprints and Web Services)
+
+---
+
+## 📋 Features
+
+- **Multi-Variable Yield Prediction:** Predicts crop yields using XGBoost regression models based on weather data, location inputs, and crop types.
+- **Assam State Support & Fallback Engine:** Handles new location inputs (like Assam) that aren't in the pre-trained model vocabulary by calculating real-time historical average trend estimates.
+- **ML Price Forecasting Engine:** Predicts commodity modal prices using market-specific features (variety, grade, min/max price boundaries).
+- **Interactive SPA Frontend:** Responsive user dashboard featuring clean parameter selectors, progressive disclosures, and interactive analytics.
+- **Administration & Audit Trails:** Real-time log monitoring console tracking prediction latency, total predictions, and security login/auth history.
+- **Production-Ready Containerization:** Standardized Docker setup with library support for running models efficiently under Linux environments.
+
+---
+
+## 📁 Project Structure
+
+```text
+crop_deploy/
+├── static/                  # Frontend Single Page App assets
+│   ├── images/              # Dashboard layouts assets
+│   ├── js/                  # SPA application scripts & API interaction
+│   ├── style.css            # Custom layout stylesheet (with dark mode styling)
+│   └── index.html           # Main dashboard index
+├── scratch/                 # Utility scripts (pre-processing, scaling parameters, validation tests)
+│   ├── align_assam.py       # Aligns and appends Assam data to dataset
+│   ├── fit_rainfall.py      # Fits z-score scaling parameters for weather data
+│   ├── verify_production_ready.py # Full integration testing script
+│   └── ...
+├── database.py              # SQLite schemas and prediction logs controller
+├── main.py                  # FastAPI application, ML prediction pipeline, fallback triggers
+├── requirements.txt         # Python package dependencies
+├── Dockerfile               # Production container builder
+├── .dockerignore            # Container context exclude rules
+├── render.yaml              # Render deployment Blueprint
+├── .gitignore               # Git ignore patterns
+├── FINAL_CLEAN_AGRI_DATASET.csv # Preprocessed lookup dataset for fallback calculation
+├── xgboost_production_model.pkl # Pre-trained yield model
+├── xgboost_modal_price_model.pkl # Pre-trained modal price model
+├── ordinal_encoder_production_features.pkl # Encoder vocabulary for yield features
+└── ordinal_encoder_price_features.pkl # Encoder vocabulary for price features
+```
+
+---
+
+## 🚀 Future Improvements
+
+- **Retrain Core Models:** Retrain the XGBoost models with the complete agricultural dataset (including Assam and other new states) to move completely away from historical average fallbacks.
+- **Cloud Object Storage:** Move large binary models and dataset CSV files to cloud storage (e.g., AWS S3 or Google Cloud Storage) to reduce git repository size and Docker build times.
+- **Role-Based Access Control (RBAC):** Implement granular access permissions for different user roles (e.g., Farmers, Agricultural Researchers, Administrators).
+- **Advanced Charts & Analytics:** Integrate a charting library (like Chart.js or D3.js) on the frontend for rich, interactive, and customizable analytics visualization.
 
 ---
 
