@@ -27,6 +27,19 @@ AgroPredict is a production-ready web application built with FastAPI and SQLite.
 
 ---
 
+## 📸 Screenshots
+
+### Login Screen
+![Login Screen](screenshots/login.png)
+
+### Dashboard Home
+![Dashboard](screenshots/dashboard.png)
+
+### Predictions & Analytical Results
+![Predictions](screenshots/prediction.png)
+
+---
+
 ## 📁 Project Structure
 
 ```text
