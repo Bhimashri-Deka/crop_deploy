@@ -1,5 +1,7 @@
 # AgroPredict: Crop Yield & Price Prediction Platform
 
+🚀 **Live Demo:** [https://agropredict-bac9.onrender.com](https://agropredict-bac9.onrender.com)
+
 AgroPredict is a production-ready web application built with FastAPI and SQLite. It provides crop yield predictions (using pre-trained XGBoost models and historical fallbacks for newer regions like Assam) and commodity price forecasts to help farmers, researchers, and administrators make data-driven agricultural decisions.
 
 ---
