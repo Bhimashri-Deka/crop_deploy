@@ -75,7 +75,6 @@ crop_deploy/
 - **Retrain Core Models:** Retrain the XGBoost models with the complete agricultural dataset (including Assam and other new states) to move completely away from historical average fallbacks.
 - **Cloud Object Storage:** Move large binary models and dataset CSV files to cloud storage (e.g., AWS S3 or Google Cloud Storage) to reduce git repository size and Docker build times.
 - **Role-Based Access Control (RBAC):** Implement granular access permissions for different user roles (e.g., Farmers, Agricultural Researchers, Administrators).
-- **Advanced Charts & Analytics:** Integrate a charting library (like Chart.js or D3.js) on the frontend for rich, interactive, and customizable analytics visualization.
 
 ---
 
