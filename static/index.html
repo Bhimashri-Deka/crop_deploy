@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons (development bundle) -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js for interactive analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -455,6 +457,20 @@
                                             </label>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Interactive Analytics Visualization Card -->
+                            <div class="metric-card analytics-chart-card" style="margin-top: 1.25rem; margin-bottom: 1.25rem;">
+                                <div class="revenue-header-row">
+                                    <span class="metric-label">Interactive Trend Analysis (Yield vs. Price)</span>
+                                    <div class="confidence-badge" style="background: rgba(2, 132, 199, 0.12); color: #bae6fd; border-color: rgba(2, 132, 199, 0.3);">
+                                        <i data-lucide="trending-up"></i>
+                                        <span>Chart.js Active</span>
+                                    </div>
+                                </div>
+                                <div class="chart-container" style="position: relative; height: 265px; width: 100%; margin-top: 1rem;">
+                                    <canvas id="historicalTrendChart"></canvas>
                                 </div>
                             </div>
 

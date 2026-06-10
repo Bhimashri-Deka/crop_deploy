@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let activeMode = "farmer"; // "farmer" or "tech"
     let cachedDefaults = null; // Cached defaults
     let lastPredictionData = null; // Cached last prediction response
+    let trendChart = null; // Chart.js instance ref
 
     // Scaling helpers
     function scaleRainfall(raw) {
@@ -745,6 +746,124 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
+    // Render advanced Chart.js historical trend chart
+    function drawAdvancedChart(trendData) {
+        const ctx = document.getElementById("historicalTrendChart");
+        if (!ctx) return;
+        
+        if (trendChart) {
+            trendChart.destroy();
+            trendChart = null;
+        }
+        
+        if (!trendData || trendData.length === 0) {
+            return;
+        }
+        
+        const labels = trendData.map(d => d.year);
+        const yieldData = trendData.map(d => d.yield);
+        const priceData = trendData.map(d => d.price);
+        
+        trendChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "Yield (Tonnes/Ha)",
+                        data: yieldData,
+                        borderColor: "#10b981",
+                        backgroundColor: "rgba(16, 185, 129, 0.1)",
+                        yAxisID: "yYield",
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointBackgroundColor: "#10b981",
+                        pointHoverRadius: 6,
+                        fill: true
+                    },
+                    {
+                        label: "Market Price (₹/Quintal)",
+                        data: priceData,
+                        borderColor: "#0284c7",
+                        backgroundColor: "rgba(2, 132, 199, 0.1)",
+                        yAxisID: "yPrice",
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointBackgroundColor: "#0284c7",
+                        pointHoverRadius: 6,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: "#f8fafc",
+                            font: {
+                                family: "Outfit",
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        mode: "index",
+                        intersect: false,
+                        titleFont: { family: "Outfit", size: 13 },
+                        bodyFont: { family: "Outfit", size: 12 }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: "rgba(255, 255, 255, 0.05)"
+                        },
+                        ticks: {
+                            color: "#cbd5e1",
+                            font: { family: "Outfit" }
+                        }
+                    },
+                    yYield: {
+                        type: "linear",
+                        position: "left",
+                        title: {
+                            display: true,
+                            text: "Yield (Tonnes/Ha)",
+                            color: "#10b981",
+                            font: { family: "Outfit", weight: "bold", size: 12 }
+                        },
+                        grid: {
+                            color: "rgba(255, 255, 255, 0.05)"
+                        },
+                        ticks: {
+                            color: "#cbd5e1",
+                            font: { family: "Outfit" }
+                        }
+                    },
+                    yPrice: {
+                        type: "linear",
+                        position: "right",
+                        title: {
+                            display: true,
+                            text: "Market Price (₹/Quintal)",
+                            color: "#0284c7",
+                            font: { family: "Outfit", weight: "bold", size: 12 }
+                        },
+                        grid: {
+                            drawOnChartArea: false
+                        },
+                        ticks: {
+                            color: "#cbd5e1",
+                            font: { family: "Outfit" }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     // Custom sparkline renderer using inline SVG elements
     function drawSparkline(containerId, trendData, valKey, label, isCurrency) {
         const container = document.getElementById(containerId);
@@ -889,6 +1008,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const trendData = data.historical_trend || [];
         drawSparkline("yield-trend-sparkline", trendData, "yield", "Tons/Ha", false);
         drawSparkline("price-trend-sparkline", trendData, "price", "INR/Q", true);
+        drawAdvancedChart(trendData);
         
         // Update visual confidence interval positioning gauge
         const predictedPrice = data.predicted_price_inr_quintal;
